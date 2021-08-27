@@ -71,19 +71,6 @@ sequelize
   // .sync({force: true})
   .sync()
   .then((result) => {
-    return User.findByPk(1);
-  })
-  .then((user) => {
-    if (!user) {
-      return User.create({ name: "Bird", email: "bird@gmail.com" });
-    }
-    return user;
-  })
-  .then((user) => {
-    // console.log(user);
-    return user.createCart();
-  })
-  .then((cart) => {
     app.listen(3000);
   })
   .catch((err) => {
