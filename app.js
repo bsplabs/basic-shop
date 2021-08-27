@@ -27,20 +27,28 @@ const authRoutes = require("./routes/auth");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
-  session({ 
-    secret: "my scret", 
+  session({
+    secret: "my scret",
     store: new SequelizeStore({
       db: sequelize,
-    }), 
-    resave: false, 
+    }),
+    resave: false,
     saveUninitialized: false,
   })
 );
 
 app.use((req, res, next) => {
-  const sessionUser = User.build({...req.session.user});
-  req.sessionUser = sessionUser;
-  next();
+  // const sessionUser = User.build({...req.session.user});
+  if (req.session.user?.id) {
+    User.findByPk(req.session.user.id)
+      .then((user) => {
+        req.sessionUser = user;
+        next();
+      })
+      .catch((err) => console.log(err));
+  } else {
+    next();
+  }
 });
 
 app.use("/admin", adminRoutes);
