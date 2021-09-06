@@ -4,6 +4,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
+const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const errorController = require("./controllers/error");
 const sequelize = require("./util/database");
@@ -15,6 +17,7 @@ const Order = require("./models/order");
 const OrderItem = require("./models/order-item");
 
 const app = express();
+const csrfProtection = csrf();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -36,6 +39,8 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(csrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
   // const sessionUser = User.build({...req.session.user});
@@ -49,6 +54,12 @@ app.use((req, res, next) => {
   } else {
     next();
   }
+});
+
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
 });
 
 app.use("/admin", adminRoutes);
